@@ -1,7 +1,7 @@
 {
-  "name": "swagger-tools",
-  "version": "0.10.3",
-  "description": "Various tools for using and integrating with Swagger.",
+  "name": "oas3-tools",
+  "version": "1.0.0",
+  "description": "Various tools for using and integrating with Swagger/Open API v3.",
   "main": "index.js",
   "scripts": {
     "test": "gulp",
@@ -13,22 +13,23 @@
     "url": "https://github.com/whitlockjc"
   },
   "bugs": {
-    "url": "https://github.com/apigee-127/swagger-tools/issues"
+    "url": "https://github.com/bug-hunters/oas3-tools/issues"
   },
-  "homepage": "https://github.com/apigee-127/swagger-tools",
+  "homepage": "https://github.com/bug-hunters/oas3-tools",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/apigee-127/swagger-tools.git"
+    "url": "git@github.com:bug-hunters/oas3-tools.git"
   },
   "keywords": [
     "api",
     "connect",
     "middleware",
-    "swagger"
+    "swagger",
+    "oas3"
   ],
   "bin": {
-    "swagger-tools": "./bin/swagger-tools"
+    "oas3-tools": "./bin/oas3-tools"
   },
   "files": [
     "bin",

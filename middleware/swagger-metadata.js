@@ -112,7 +112,7 @@ var expressStylePath = function (basePath, apiPath) {
 
 var processOperationParameters = function (swaggerMetadata, pathKeys, pathMatch, req, res, next) {
   var version = swaggerMetadata.swaggerVersion;
-  var spec = cHelpers.getSpec(cHelpers.getSwaggerVersion(version === '1.2' ?
+  var spec = cHelpers.getSpec(cHelpers.getDefinitionVersion(version === '1.2' ?
                                                          swaggerMetadata.resourceListing :
                                                          swaggerMetadata.swaggerObject), true);
   var parameters = !_.isUndefined(swaggerMetadata) ?
@@ -232,7 +232,7 @@ var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
     throw new TypeError('rlOrSO must be an object');
   }
 
-  var spec = cHelpers.getSpec(cHelpers.getSwaggerVersion(rlOrSO), true);
+  var spec = cHelpers.getSpec(cHelpers.getDefinitionVersion(rlOrSO), true);
   var apiCache = {};
   var composeParameters = function (apiPath, method, path, operation) {
     var cParams = [];
@@ -374,7 +374,7 @@ exports = module.exports = function (rlOrSO, apiDeclarations) {
   debug('Initializing swagger-metadata middleware');
 
   var apiCache = processSwaggerDocuments(rlOrSO, apiDeclarations);
-  var swaggerVersion = cHelpers.getSwaggerVersion(rlOrSO);
+  var swaggerVersion = cHelpers.getDefinitionVersion(rlOrSO);
 
   if (_.isUndefined(rlOrSO)) {
     throw new Error('rlOrSO is required');

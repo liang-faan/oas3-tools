@@ -41,7 +41,7 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
   }
 
   args = [rlOrSO];
-  spec = helpers.getSpec(helpers.getSwaggerVersion(rlOrSO), true);
+  spec = helpers.getSpec(helpers.getDefinitionVersion(rlOrSO), true);
 
   debug('  Identified Swagger version: %s', spec.version);
 

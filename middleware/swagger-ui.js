@@ -53,7 +53,7 @@ var staticOptions = {};
 exports = module.exports = function (rlOrSO, apiDeclarations, options) {
   debug('Initializing swagger-ui middleware');
 
-  var swaggerVersion = helpers.getSwaggerVersion(rlOrSO);
+  var swaggerVersion = helpers.getDefinitionVersion(rlOrSO);
   var apiDocsCache = {}; // Swagger document endpoints cache
   var apiDocsPaths = [];
   var staticMiddleware;

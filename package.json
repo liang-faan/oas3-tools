@@ -1,6 +1,6 @@
 {
   "name": "oas3-tools",
-  "version": "1.0.0",
+  "version": "1.0.1-RC0",
   "description": "Various tools for using and integrating with Swagger/Open API v3.",
   "main": "index.js",
   "scripts": {

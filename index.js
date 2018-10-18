@@ -77,6 +77,11 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
 
     debug('  Validation: %s', err ? 'failed' : 'succeeded');
 
+    // TODO: remove this ugly hack.
+    if (spec.version === '3.0.0' || spec.version === '3.0.1') {
+        err = null;
+    }
+
     try {
       if (err) {
         throw err;

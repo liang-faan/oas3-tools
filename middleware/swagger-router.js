@@ -26,7 +26,7 @@
 
 var _ = require('lodash');
 var cHelpers = require('../lib/helpers');
-var debug = require('debug')('swagger-tools:middleware:router');
+var debug = require('debug')('oas3-tools:middleware:router');
 var fs = require('fs');
 var mHelpers = require('./helpers');
 var path = require('path');
@@ -38,22 +38,13 @@ var defaultOptions = {
 var getHandlerName = function (req) {
   var handlerName;
 
-  switch (req.swagger.swaggerVersion) {
-  case '1.2':
-    handlerName = req.swagger.operation.nickname;
-    break;
-
-  case '2.0':
-    if (req.swagger.operation['x-swagger-router-controller'] || req.swagger.path['x-swagger-router-controller']) {
-      handlerName = (req.swagger.operation['x-swagger-router-controller'] ?
-        req.swagger.operation['x-swagger-router-controller'] :
-        req.swagger.path['x-swagger-router-controller']) + '_' +
-        (req.swagger.operation.operationId ? req.swagger.operation.operationId : req.method.toLowerCase());
-    } else {
-      handlerName = req.swagger.operation.operationId;
-    }
-
-    break;
+  if (req.swagger.operation['x-swagger-router-controller'] || req.swagger.path['x-swagger-router-controller']) {
+    handlerName = (req.swagger.operation['x-swagger-router-controller'] ?
+      req.swagger.operation['x-swagger-router-controller'] :
+      req.swagger.path['x-swagger-router-controller']) + '_' +
+      (req.swagger.operation.operationId ? req.swagger.operation.operationId : req.method.toLowerCase());
+  } else {
+    handlerName = req.swagger.operation.operationId;
   }
 
   return handlerName;
@@ -244,33 +235,22 @@ var mockResponse = function (req, res, next, handlerName) {
   var apiDOrSO;
   var responseType;
 
-  switch (req.swagger.swaggerVersion) {
-  case '1.2':
-    apiDOrSO = req.swagger.apiDeclaration;
-    responseType = operation.type;
+  apiDOrSO = req.swagger.swaggerObject;
 
-    break;
+  if (method === 'post' && operation.responses['201']) {
+    responseType = operation.responses['201'];
 
-  case '2.0':
-    apiDOrSO = req.swagger.swaggerObject;
+    res.statusCode = 201;
+  } else if (method === 'delete' && operation.responses['204']) {
+    responseType = operation.responses['204'];
 
-    if (method === 'post' && operation.responses['201']) {
-      responseType = operation.responses['201'];
-
-      res.statusCode = 201;
-    } else if (method === 'delete' && operation.responses['204']) {
-      responseType = operation.responses['204'];
-
-      res.statusCode = 204;
-    } else if (operation.responses['200']) {
-      responseType = operation.responses['200'];
-    } else if (operation.responses['default']) {
-      responseType = operation.responses['default'];
-    } else {
-      responseType = 'void';
-    }
-
-    break;
+    res.statusCode = 204;
+  } else if (operation.responses['200']) {
+    responseType = operation.responses['200'];
+  } else if (operation.responses['default']) {
+    responseType = operation.responses['default'];
+  } else {
+    responseType = 'void';
   }
 
   if (_.isPlainObject(responseType) || mHelpers.isModelType(spec, responseType)) {

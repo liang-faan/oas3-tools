@@ -383,7 +383,7 @@ exports = module.exports = function (options) {
         debug('    Ignored: %s', options.ignoreMissingHandlers === true ? 'yes' : 'no');
         debug('    Using mock: %s', options.useStubs && _.isUndefined(handler) ? 'yes' : 'no');
 
-        if (_.isUndefined(handler) && options.useStubs === true) {
+        if (_.isUndefined(handler) || options.useStubs === true) {
           handler = handlerCache[handlerName] = createStubHandler(handlerName);
         }
 

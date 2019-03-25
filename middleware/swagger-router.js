@@ -265,6 +265,10 @@ var mockResponse = function (req, res, next, handlerName) {
                                            JSON.stringify(getMockValue(req.swagger.swaggerVersion, result)));
         }
       });
+    } else if(req.swagger.swaggerVersion === '3.0.1') {
+      var contentType = req.headers['content-type'] || 'application/json';
+      var responseType = responseType.content[contentType].schema;
+      return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType)));
     } else {
       return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType.schema || responseType)));
     }

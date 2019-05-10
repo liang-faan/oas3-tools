@@ -265,6 +265,10 @@ var mockResponse = function (req, res, next, handlerName) {
                                            JSON.stringify(getMockValue(req.swagger.swaggerVersion, result)));
         }
       });
+    } else if(req.swagger.swaggerVersion === '3.0.1') {
+      var contentType = req.headers['content-type'] || 'application/json';
+      var responseType = responseType.content[contentType].schema;
+      return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType)));
     } else {
       return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType.schema || responseType)));
     }
@@ -379,7 +383,7 @@ exports = module.exports = function (options) {
         debug('    Ignored: %s', options.ignoreMissingHandlers === true ? 'yes' : 'no');
         debug('    Using mock: %s', options.useStubs && _.isUndefined(handler) ? 'yes' : 'no');
 
-        if (_.isUndefined(handler) && options.useStubs === true) {
+        if (_.isUndefined(handler) || options.useStubs === true) {
           handler = handlerCache[handlerName] = createStubHandler(handlerName);
         }
 

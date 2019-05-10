@@ -67,8 +67,8 @@ var handlerCacheFromDir = function (dirOrDirs) {
     _.each(fs.readdirSync(dir), function (file) {
       var controllerName = file.replace(jsFileRegex, '');
       var controller;
-
-      if (file.match(jsFileRegex)) {
+      
+      if (file.match(jsFileRegex) && file.indexOf(".test.js") === -1) {
         controller = require(path.resolve(path.join(dir, controllerName)));
 
         debug('    %s%s:',

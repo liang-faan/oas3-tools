@@ -67,7 +67,7 @@ var isModelParameter = module.exports.isModelParameter = function (version, para
 };
 
 module.exports.getParameterValue = function (version, parameter, pathKeys, match, req, debug) {
-  var defaultVal = version === '1.2' ? parameter.defaultValue : parameter.default;
+  var defaultVal = version === '1.2' ? parameter.defaultValue : parameter.schema.default;
   var paramLocation = version === '1.2' ? parameter.paramType : parameter.in;
   var paramType = getParameterType(parameter);
   var val;

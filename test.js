@@ -12,7 +12,7 @@ var serverPort = 8080;
 // swaggerRouter configuration
 var options = {
   swaggerUi: path.join(__dirname, '/openapi.json'),
-  controllers: path.join(__dirname, './controllers'),
+  controllers: path.join(__dirname, 'test/controllers3'),
   useStubs: process.env.NODE_ENV === 'development' // Conditionally turn on stubs (mock mode)
 };
 
@@ -23,8 +23,6 @@ var swaggerDoc = jsyaml.safeLoad(spec);
 
 // Initialize the Swagger middleware
 swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
-  console.log("||||||||||||||||||||||||||||||||||||||||||| middlewareando ando")
-  console.log(middleware)
   // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
   app.use(middleware.swaggerMetadata());
 
@@ -38,7 +36,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   app.use(middleware.swaggerUi());
 
   // Start the server
-  console.log("i wanna create a server....")
   http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);

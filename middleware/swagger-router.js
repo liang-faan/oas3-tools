@@ -248,7 +248,9 @@ var mockResponse = function (req, res, next, handlerName) {
   if (_.isPlainObject(responseType) || mHelpers.isModelType(spec, responseType)) {
     if(req.swagger.swaggerVersion === '3.0.0' || req.swagger.swaggerVersion === '3.0.1' || req.swagger.swaggerVersion === '3.0.2') {
       var contentType = req.headers['content-type'] || 'application/json';
-      var responseType = responseType.content[contentType].schema;
+      if (responseType.content !== undefined && responseType.content[contentType] !== undefined) {
+        responseType = responseType.content[contentType].schema;
+      }
       return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType)));
     } else {
       return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType.schema || responseType)));

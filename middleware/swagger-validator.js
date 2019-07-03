@@ -41,8 +41,6 @@ var sendData = function (swaggerVersion, res, data, encoding, skipped) {
     if (_.isUndefined(res.getHeader('content-type'))) {
       // This scenario only happens for a 204/304 response and there is no Content-Type
       debug('    Validation: skipped (Cached response for \'%d\')', res.statusCode);
-    } else if (swaggerVersion === '1.2') {
-      debug('    Validation: skipped (No responseMessage definition)', res.statusCode);
     } else {
       debug('    Validation: skipped (No response definition)', res.statusCode);
     }
@@ -108,8 +106,8 @@ var send400 = function (req, res, next, err) {
   return next(err);
 };
 var validateValue = function (req, schema, path, val, location, callback) {
-  var document = req.swagger.apiDeclaration || req.swagger.swaggerObject;
-  var version = req.swagger.apiDeclaration ? '1.2' : '2.0';
+  var document = req.swagger.swaggerObject;
+  var version = req.swagger.swaggerVersion;
   var isModel = mHelpers.isModelParameter(version, schema);
   var spec = cHelpers.getSpec(version);
 
@@ -134,18 +132,12 @@ var validateValue = function (req, schema, path, val, location, callback) {
     }
 
     async.map(schema.type === 'array' ? val : [val], function (aVal, oCallback) {
-      if (version === '1.2') {
-        spec.validateModel(document, '#/models/' + (schema.items ?
-                                                    schema.items.type || schema.items.$ref :
-                                                    schema.type), aVal, oCallback);
-      } else {
-        try {
-          validators.validateAgainstSchema(schema.schema ? schema.schema : schema, val);
+      try {
+        validators.validateAgainstSchema(schema.schema ? schema.schema : schema, val);
 
-          oCallback();
-        } catch (err) {
-          oCallback(err);
-        }
+        oCallback();
+      } catch (err) {
+        oCallback(err);
       }
     }, function (err, allResults) {
       if (!err) {
@@ -242,20 +234,6 @@ var wrapEnd = function (req, res, next) {
       if (_.isUndefined(schema.type)) {
         if (schema.schema) {
           schema = schema.schema;
-        } else if (swaggerVersion === '1.2') {
-          schema = _.find(operation.responseMessages, function (responseMessage, index) {
-            if (responseMessage.code === res.statusCode) {
-              vPath.push('responseMessages', index.toString());
-
-              responseCode = responseMessage.code;
-
-              return true;
-            }
-          });
-
-          if (!_.isUndefined(schema)) {
-            schema = schema.responseModel;
-          }
         } else {
           schema = _.find(operation.responses, function (response, code) {
             if (code === (res.statusCode || 200).toString()) {
@@ -276,7 +254,7 @@ var wrapEnd = function (req, res, next) {
         }
       }
 
-      debug('    Response ' + (swaggerVersion === '1.2' ? 'message' : 'code') + ': ' + responseCode);
+      debug('Response code: ' + responseCode);
 
       if (_.isUndefined(schema)) {
         sendData(swaggerVersion, res, val, encoding, true);
@@ -345,10 +323,7 @@ exports = module.exports = function (options) {
       try {
         // Validate the content type
         try {
-          validators.validateContentType(req.swagger.swaggerVersion === '1.2' ?
-                                         req.swagger.api.consumes :
-                                         req.swagger.swaggerObject.consumes,
-                                         operation.consumes, req);
+          validators.validateContentType(req.swagger.swaggerObject.consumes, operation.consumes, req);
         } catch (err) {
           err.failedValidation = true;
 
@@ -358,14 +333,12 @@ exports = module.exports = function (options) {
         async.map(swaggerVersion === '1.2' ?
                   operation.parameters :
                   req.swagger.operationParameters, function (parameter, oCallback) {
-                    var schema = swaggerVersion === '1.2' ? parameter : parameter.schema;
-                    var pLocation = swaggerVersion === '1.2' ? schema.paramType : schema.in;
+                    var schema = parameter.schema;
+                    var pLocation = schema.in;
                     var val;
 
                     paramName = schema.name;
-                    paramPath = swaggerVersion === '1.2' ?
-                      req.swagger.operationPath.concat(['params', paramIndex.toString()]) :
-                      parameter.path;
+                    paramPath = parameter.path;
                     val = req.swagger.params[paramName].value;
 
                     // Validate requiredness

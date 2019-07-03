@@ -30,18 +30,13 @@ var helpers = require('./helpers');
 
 var getScopeOrAPIKey = function (req, secDef, secName, secReq) {
   var swaggerVersion = req.swagger.swaggerVersion;
-  var apiKeyPropName = swaggerVersion === '1.2' ? secDef.keyname : secDef.name;
-  var apiKeyLocation = swaggerVersion === '1.2' ? secDef.passAs : secDef.in;
+  var apiKeyPropName = secDef.name;
+  var apiKeyLocation = secDef.in;
   var scopeOrKey;
 
   if (secDef.type === 'oauth2') {
-    if (swaggerVersion === '1.2') {
-      scopeOrKey = _.map(secReq[secName], function (scope) {
-        return scope.scope;
-      });
-    } else {
-      scopeOrKey = secReq[secName];
-    }
+    scopeOrKey = secReq[secName];
+
   } else if (secDef.type === 'apiKey') {
     if (apiKeyLocation === 'query') {
       scopeOrKey = (req.query ? req.query : helpers.parseQueryString(req))[apiKeyPropName];

@@ -111,9 +111,7 @@ var getMockValue = function (version, schema) {
     break;
 
   case 'boolean':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (version === '2.0' && !_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -133,9 +131,7 @@ var getMockValue = function (version, schema) {
     break;
 
   case 'integer':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (version === '2.0' && !_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -168,9 +164,7 @@ var getMockValue = function (version, schema) {
     break;
 
   case 'number':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (version === '2.0' && !_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -188,9 +182,7 @@ var getMockValue = function (version, schema) {
     break;
 
   case 'string':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (version === '2.0' && !_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -254,18 +246,7 @@ var mockResponse = function (req, res, next, handlerName) {
   }
 
   if (_.isPlainObject(responseType) || mHelpers.isModelType(spec, responseType)) {
-    if (req.swagger.swaggerVersion === '1.2') {
-      spec.composeModel(apiDOrSO, responseType, function (err, result) {
-        if (err) {
-          return sendResponse(undefined, err);
-        } else {
-          // Should we handle this differently as undefined typically means the model doesn't exist
-          return sendResponse(undefined, _.isUndefined(result) ?
-                                           stubResponse :
-                                           JSON.stringify(getMockValue(req.swagger.swaggerVersion, result)));
-        }
-      });
-    } else if(req.swagger.swaggerVersion === '3.0.1') {
+    if(req.swagger.swaggerVersion === '3.0.0' || req.swagger.swaggerVersion === '3.0.1' || req.swagger.swaggerVersion === '3.0.2') {
       var contentType = req.headers['content-type'] || 'application/json';
       var responseType = responseType.content[contentType].schema;
       return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType)));

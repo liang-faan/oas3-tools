@@ -43,7 +43,7 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
   args = [rlOrSO];
   spec = helpers.getSpec(helpers.getDefinitionVersion(rlOrSO), true);
 
-  debug('  Identified Swagger version: %s', spec.version);
+  console.log('  Identified Swagger version: %s', spec.version);
 
   callback = arguments[1];
 
@@ -120,5 +120,6 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
 
 module.exports = {
   initializeMiddleware: initializeMiddleware,
+  expressApp: require('./middleware/express-app'),
   specs: require('./lib/specs')
 };

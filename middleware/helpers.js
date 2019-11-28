@@ -28,7 +28,6 @@
 
 var _ = require('lodash');
 var helpers = require('../lib/helpers');
-var validators = require('../lib/validators');
 var parseurl = require('parseurl');
 var qs = require('qs');
 
@@ -290,8 +289,8 @@ var convertValue = module.exports.convertValue = function (value, schema, type, 
 
   case 'string':
     if(!_.isDate(value)) {
-      var isDate = schema.format === 'date' && validators.isValidDate(value);
-      var isDateTime = schema.format === 'date-time' && validators.isValidDateTime(value);
+      var isDate = schema.format === 'date';
+      var isDateTime = schema.format === 'date-time';
       if (isDate || isDateTime) {
         value = new Date(value);
     

@@ -28,7 +28,7 @@ var _ = require('lodash');
 var async = require('async');
 var bp = require('body-parser');
 var cHelpers = require('../lib/helpers');
-var debug = require('debug')('swagger-tools:middleware:metadata');
+var debug = require('debug')('oas3-tools:middleware:metadata');
 var mHelpers = require('./helpers');
 var multer = require('multer');
 var parseurl = require('parseurl');
@@ -270,18 +270,7 @@ var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
 
     debug(new Array(indent + 1).join(' ') + 'Found %s: %s', 'Path', apiPath);
 
-    cacheEntry = apiCache[cacheKey] = spec.version === '1.2' ?
-      {
-        api: apiOrPath,
-        apiDeclaration: adOrSO,
-        apiIndex: indexOrName,
-        keys: keys,
-        params: {},
-        re: re,
-        operations: {},
-        resourceListing: rlOrSO
-      } :
-      {
+    cacheEntry = apiCache[cacheKey] = {
         apiPath: indexOrName,
         path: apiOrPath,
         keys: keys,
@@ -337,7 +326,7 @@ var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
  * @returns the middleware function
  */
 exports = module.exports = function (rlOrSO, apiDeclarations) {
-  debug('Initializing swagger-metadata middleware');
+  console.log('Initializing swagger-metadata middleware');
 
   var apiCache = processSwaggerDocuments(rlOrSO, apiDeclarations);
   var swaggerVersion = cHelpers.getDefinitionVersion(rlOrSO);

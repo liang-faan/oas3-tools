@@ -25,14 +25,14 @@
 'use strict';
 
 var _ = require('lodash');
-var debug = require('debug')('swagger-tools:middleware');
+var debug = require('debug')('oas3-tools:middleware');
 var helpers = require('./lib/helpers');
 
 var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, callback) {
   var args;
   var spec;
 
-  debug('Initializing middleware');
+  console.log('Initializing middleware');
 
   if (_.isUndefined(rlOrSO)) {
     throw new Error('rlOrSO is required');
@@ -45,19 +45,7 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
 
   debug('  Identified Swagger version: %s', spec.version);
 
-  if (spec.version === '1.2') {
-    if (_.isUndefined(resources)) {
-      throw new Error('resources is required');
-    } else if (!_.isArray(resources)) {
-      throw new TypeError('resources must be an array');
-    }
-
-    debug('  Number of API Declarations: %d', resources.length);
-
-    args.push(resources);
-  } else {
-    callback = arguments[1];
-  }
+  callback = arguments[1];
 
   if (_.isUndefined(callback)) {
     throw new Error('callback is required');
@@ -67,6 +55,8 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
 
   args.push(function (err, results) {
     if (results && results.errors.length + _.reduce(results.apiDeclarations || [], function (count, apiDeclaration) {
+      console.log('apiDeclaration from arg.push')
+      console.log(apiDeclaration)
       return count += (apiDeclaration ? apiDeclaration.errors.length : 0);
     }, 0) > 0) {
       err = new Error('Swagger document(s) failed validation so the server cannot start');
@@ -100,20 +90,11 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
         swaggerUi: function (options) {
           var swaggerUi = require('./middleware/swagger-ui');
           var suArgs = [rlOrSO];
-
-          if (spec.version === '1.2') {
-            suArgs.push(_.reduce(resources, function (map, resource) {
-              map[resource.resourcePath] = resource;
-
-              return map;
-            }, {}));
-          }
-
           suArgs.push(options || {});
 
           return swaggerUi.apply(undefined, suArgs);
         },
-        swaggerValidator: require('./middleware/swagger-validator')
+        //swaggerValidator: require('./middleware/swagger-validator')
       });
     } catch (err) {
       if (process.env.RUNNING_SWAGGER_TOOLS_TESTS === 'true') {

@@ -27,7 +27,6 @@
 var _ = require('lodash');
 var debug = require('debug')('swagger-tools:middleware:ui');
 var fs = require('fs');
-var helpers = require('../lib/helpers');
 var parseurl = require('parseurl');
 var path = require('path');
 var serveStatic = require('serve-static');
@@ -41,7 +40,7 @@ var staticOptions = {};
 /**
  * Middleware for serving the Swagger documents and Swagger UI.
  *
- * @param {object} rlOrSO - The Resource Listing (Swagger 1.2) or Swagger Object (Swagger 2.0)
+ * @param {object} definition - The Resource Listing (Swagger 1.2) or Swagger Object (Swagger 2.0)
  * @param {object[]} apiDeclarations - The array of API Declarations (Swagger 1.2)
  * @param {object} [options] - The configuration options
  * @param {string=/api-docs} [options.apiDocs] - The relative path to serve your Swagger documents from
@@ -50,17 +49,17 @@ var staticOptions = {};
  *
  * @returns the middleware function
  */
-exports = module.exports = function (rlOrSO, apiDeclarations, options) {
+exports = module.exports = function (definition, apiDeclarations, options) {
   debug('Initializing swagger-ui middleware');
 
-  var swaggerVersion = helpers.getDefinitionVersion(rlOrSO);
+  var openapiVersion = definition.openapi;
   var apiDocsCache = {}; // Swagger document endpoints cache
   var apiDocsPaths = [];
   var staticMiddleware;
   var swaggerApiDocsURL;
   var swaggerUiPath;
 
-  if (swaggerVersion !== '1.2') {
+  if (openapiVersion !== '1.2') {
     options = apiDeclarations;
     apiDeclarations = [];
   }
@@ -68,13 +67,13 @@ exports = module.exports = function (rlOrSO, apiDeclarations, options) {
   // Set the defaults
   options = _.defaults(options || {}, defaultOptions);
 
-  if (_.isUndefined(rlOrSO)) {
+  if (_.isUndefined(definition)) {
     throw new Error('rlOrSO is required');
-  } else if (!_.isPlainObject(rlOrSO)) {
+  } else if (!_.isPlainObject(definition)) {
     throw new TypeError('rlOrSO must be an object');
   }
 
-  if (swaggerVersion === '1.2') {
+  if (openapiVersion === '1.2') {
     if (_.isUndefined(apiDeclarations)) {
       throw new Error('apiDeclarations is required');
     } else if (!_.isPlainObject(apiDeclarations)) {
@@ -109,7 +108,7 @@ exports = module.exports = function (rlOrSO, apiDeclarations, options) {
   debug('  API Docs path: %s', options.apiDocs);
 
   // Add the Resource Listing or SwaggerObject to the response cache
-  apiDocsCache[options.apiDocs] = JSON.stringify(rlOrSO, null, 2);
+  apiDocsCache[options.apiDocs] = JSON.stringify(definition, null, 2);
 
   // Add API Declarations to the response cache
   _.each(apiDeclarations, function (resource, resourcePath) {
@@ -127,7 +126,7 @@ exports = module.exports = function (rlOrSO, apiDeclarations, options) {
 
   return function swaggerUI (req, res, next) {
     var path = parseurl(req).pathname;
-    var isApiDocsPath = apiDocsPaths.indexOf(path) > -1 || (swaggerVersion !== '1.2' && path === options.apiDocsPath);
+    var isApiDocsPath = apiDocsPaths.indexOf(path) > -1 || (openapiVersion !== '1.2' && path === options.apiDocsPath);
     var isSwaggerUiPath = path === options.swaggerUi || path.indexOf(options.swaggerUi + '/') === 0;
 
     if (_.isUndefined(swaggerApiDocsURL)) {

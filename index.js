@@ -25,26 +25,17 @@
 'use strict';
 
 var _ = require('lodash');
-var debug = require('debug')('oas3-tools:middleware');
-var helpers = require('./lib/helpers');
+var debug = require('debug');
 
-var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, callback) {
-  var args;
-  var spec;
-
+var initializeMiddleware = function initializeMiddleware (definition, resources, callback) {
   console.log('Initializing middleware');
 
-  if (_.isUndefined(rlOrSO)) {
-    throw new Error('rlOrSO is required');
-  } else if (!_.isPlainObject(rlOrSO)) {
-    throw new TypeError('rlOrSO must be an object');
+  if (_.isUndefined(definition)) {
+    throw new Error('OpenAPI 3 document is required');
+  } else if (!_.isPlainObject(definition)) {
+    throw new TypeError('OpenAPI 3 document must be an object');
   }
-
-  args = [rlOrSO];
-  spec = helpers.getSpec(helpers.getDefinitionVersion(rlOrSO), true);
-
-  console.log('  Identified Swagger version: %s', spec.version);
-
+  console.log('  Identified Swagger version: %s', definition.openapi);
   callback = arguments[1];
 
   if (_.isUndefined(callback)) {
@@ -53,73 +44,20 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
     throw new TypeError('callback must be a function');
   }
 
-  args.push(function (err, results) {
-    if (results && results.errors.length + _.reduce(results.apiDeclarations || [], function (count, apiDeclaration) {
-      console.log('apiDeclaration from arg.push')
-      console.log(apiDeclaration)
-      return count += (apiDeclaration ? apiDeclaration.errors.length : 0);
-    }, 0) > 0) {
-      err = new Error('Swagger document(s) failed validation so the server cannot start');
+  callback({
+    swaggerRouter: require('./middleware/swagger-router'),
+    swaggerSecurity: require('./middleware/swagger-security'),
+    swaggerUi: function (options) {
+      const swaggerUi = require('./middleware/swagger-ui');
+      const suArgs = [definition];
+      suArgs.push(options || {});
 
-      err.failedValidation = true;
-      err.results = results;
-    }
-
-    debug('  Validation: %s', err ? 'failed' : 'succeeded');
-
-    // TODO: remove this ugly hack.
-    if (spec.version === '3.0.0' || spec.version === '3.0.1' || spec.version === '3.0.2') {
-        err = null;
-    }
-
-    try {
-      if (err) {
-        throw err;
-      }
-
-      callback({
-        // Create a wrapper to avoid having to pass the non-optional arguments back to the swaggerMetadata middleware
-        swaggerMetadata: function () {
-          var swaggerMetadata = require('./middleware/swagger-metadata');
-
-          return swaggerMetadata.apply(undefined, args.slice(0, args.length - 1));
-        },
-        swaggerRouter: require('./middleware/swagger-router'),
-        swaggerSecurity: require('./middleware/swagger-security'),
-        // Create a wrapper to avoid having to pass the non-optional arguments back to the swaggerUi middleware
-        swaggerUi: function (options) {
-          var swaggerUi = require('./middleware/swagger-ui');
-          var suArgs = [rlOrSO];
-          suArgs.push(options || {});
-
-          return swaggerUi.apply(undefined, suArgs);
-        },
-        //swaggerValidator: require('./middleware/swagger-validator')
-      });
-    } catch (err) {
-      if (process.env.RUNNING_SWAGGER_TOOLS_TESTS === 'true') {
-        // When running the swagger-tools test suite, we want to return an error instead of exiting the process.  This
-        // does not mean that this function is an error-first callback but due to json-refs using Promises, we have to
-        // return the error to avoid the error being swallowed.
-        callback(err);
-      } else {
-        if (err.failedValidation === true) {
-          helpers.printValidationResults(spec.version, rlOrSO, resources, results, true);
-        } else {
-          console.error('Error initializing middleware');
-          console.error(err.stack);
-        }
-
-        process.exit(1);
-      }
-    }
+      return swaggerUi.apply(undefined, suArgs);
+    },
   });
-
-  spec.validate.apply(spec, args);
 };
 
 module.exports = {
   initializeMiddleware: initializeMiddleware,
   expressApp: require('./middleware/express-app'),
-  specs: require('./lib/specs')
 };

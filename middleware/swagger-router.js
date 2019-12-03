@@ -25,7 +25,7 @@
 'use strict';
 
 var _ = require('lodash');
-var debug = require('debug');
+var debug = require('debug')('oas3-tools:swagger-router');
 var fs = require('fs');
 var mHelpers = require('./helpers');
 var path = require('path');
@@ -157,9 +157,7 @@ exports = module.exports = function (options) {
       debug('    Missing: %s', _.isUndefined(handler) ? 'yes' : 'no');
       debug('    Ignored: %s', options.ignoreMissingHandlers === true ? 'yes' : 'no');
 
-      //if (_.isUndefined(handler) || options.useStubs === true) {
       if (_.isUndefined(handler)) {
-        //handler = handlerCache[handlerName] = createStubHandler(handlerName);
         return send405(req, res, next);
       }
 

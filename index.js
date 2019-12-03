@@ -27,23 +27,14 @@
 var _ = require('lodash');
 var debug = require('debug');
 
-var initializeMiddleware = function initializeMiddleware (definition, resources, callback) {
-  console.log('Initializing middleware');
+var initializeMiddleware = function initializeMiddleware (definition, callback) {
+  debug('Initializing middleware');
 
   if (_.isUndefined(definition)) {
     throw new Error('OpenAPI 3 document is required');
   } else if (!_.isPlainObject(definition)) {
     throw new TypeError('OpenAPI 3 document must be an object');
   }
-  console.log('  Identified Swagger version: %s', definition.openapi);
-  callback = arguments[1];
-
-  if (_.isUndefined(callback)) {
-    throw new Error('callback is required');
-  } else if (!_.isFunction(callback)) {
-    throw new TypeError('callback must be a function');
-  }
-
   callback({
     swaggerRouter: require('./middleware/swagger-router'),
     swaggerSecurity: require('./middleware/swagger-security'),

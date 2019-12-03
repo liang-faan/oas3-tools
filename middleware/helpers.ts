@@ -24,31 +24,42 @@
 
 'use strict';
 
-var _ = require('lodash');
-var debug = require('debug');
+import { each } from 'lodash';
+import parseurl = require('parseurl');
+import qs = require('qs');
 
-var initializeMiddleware = function initializeMiddleware (definition, callback) {
-  debug('Initializing middleware');
-
-  if (_.isUndefined(definition)) {
-    throw new Error('OpenAPI 3 document is required');
-  } else if (!_.isPlainObject(definition)) {
-    throw new TypeError('OpenAPI 3 document must be an object');
-  }
-  callback({
-    swaggerRouter: require('./middleware/swagger-router'),
-    swaggerSecurity: require('./middleware/swagger-security'),
-    swaggerUi: function (options) {
-      const swaggerUi = require('./middleware/swagger-ui');
-      const suArgs = [definition];
-      suArgs.push(options || {});
-
-      return swaggerUi.apply(undefined, suArgs);
-    },
-  });
+export function parseQueryString(req) {
+  return req.url.indexOf('?') > -1 ? qs.parse(parseurl(req).query, {}) : {};
 };
 
-module.exports = {
-  initializeMiddleware: initializeMiddleware,
-  expressApp: require('./middleware/express-app'),
+export function debugError(err, debug) {
+  var reason = err.message.replace(/^.*validation failed: /, '');
+
+  reason = reason.charAt(0).toUpperCase() + reason.substring(1);
+
+  debug('  Reason: %s', reason);
+
+  if (err.failedValidation === true) {
+    if (err.results) {
+      debug('  Errors:');
+
+      each(err.results.errors, function (error, index: number) {
+        debug('    %d:', index);
+        debug('      code: %s', error.code);
+        debug('      message: %s', error.message);
+        debug('      path: %s', JSON.stringify(error.path));
+      });
+    }
+  }
+
+  if (err.stack) {
+    debug('  Stack:');
+
+    each(err.stack.split('\n'), function (line, index: number) {
+      // Skip the first line since it's in the reasonx
+      if (index > 0) {
+        debug('  %s', line);
+      }
+    });
+  }
 };

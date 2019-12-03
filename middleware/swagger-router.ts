@@ -24,17 +24,17 @@
 
 'use strict';
 
-var _ = require('lodash');
-var debug = require('debug')('oas3-tools:swagger-router');
-var fs = require('fs');
-var mHelpers = require('./helpers');
-var path = require('path');
+const _ = require('lodash');
+const  debug = require('debug')('oas3-tools:swagger-router');
+const  fs = require('fs');
+const  mHelpers = require('./helpers');
+const  path = require('path');
 
 var defaultOptions = {
   controllers: {},
   useStubs: false // not for now.
 };
-var getHandlerName = function (req) {
+const  getHandlerName = function (req) {
   var handlerName;
 
   if (req.openapi.schema['x-swagger-router-controller']) {
@@ -46,10 +46,10 @@ var getHandlerName = function (req) {
   return handlerName;
 };
 
-var handlerCacheFromDir = function (dirOrDirs) {
-  var handlerCache = {};
-  var jsFileRegex = /\.(coffee|js|ts)$/;
-  var dirs = [];
+const handlerCacheFromDir = function (dirOrDirs) {
+  const  handlerCache = {};
+  const  jsFileRegex = /\.(coffee|js|ts)$/;
+  const  dirs = [];
 
   if (_.isArray(dirOrDirs)) {
     dirs = dirOrDirs;
@@ -93,7 +93,7 @@ var handlerCacheFromDir = function (dirOrDirs) {
   return handlerCache;
 };
 
-var send405 = function (req, res, next) {
+const  send405 = function (req, res, next) {
   var err = new Error('Route defined in OpenAPI specification (' + req.openapi.openApiRoute + ') but there is no defined on' + req.method.toUpperCase() + ' operation.');
   res.statusCode = 405;
   return next(err);
@@ -114,7 +114,7 @@ var send405 = function (req, res, next) {
  *
  * @returns the middleware function
  */
-exports = module.exports = function (options) {
+export default function (options) {
   var handlerCache = {};
 
   debug('Initializing swagger-router middleware');

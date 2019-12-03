@@ -24,18 +24,18 @@
 
 'use strict';
 
-var _ = require('lodash');
+import _ = require('lodash');
 var debug = require('debug')('swagger-tools:middleware:ui');
-var fs = require('fs');
-var parseurl = require('parseurl');
-var path = require('path');
-var serveStatic = require('serve-static');
+import fs = require('fs');
+import parseurl = require('parseurl');
+import path = require('path');
+import serveStatic = require('serve-static');
 
-var defaultOptions = {
+const defaultOptions = {
   apiDocs: '/api-docs',
   swaggerUi: '/docs'
 };
-var staticOptions = {};
+const staticOptions = {};
 
 /**
  * Middleware for serving the Swagger documents and Swagger UI.
@@ -49,12 +49,12 @@ var staticOptions = {};
  *
  * @returns the middleware function
  */
-exports = module.exports = function (definition, apiDeclarations, options) {
+export default function (definition, apiDeclarations, options) {
   debug('Initializing swagger-ui middleware');
 
-  var openapiVersion = definition.openapi;
-  var apiDocsCache = {}; // Swagger document endpoints cache
-  var apiDocsPaths = [];
+  const  openapiVersion = definition.openapi;
+  const  apiDocsCache = {}; // Swagger document endpoints cache
+  var  apiDocsPaths = [];
   var staticMiddleware;
   var swaggerApiDocsURL;
   var swaggerUiPath;

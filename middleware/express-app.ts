@@ -1,13 +1,13 @@
 'use strict';
 
-var express = require('express');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var logger = require('morgan');
-var OpenApiValidator = require('express-openapi-validator').OpenApiValidator;
-var app = express();
+import * as express from 'express';
+import cookieParser = require('cookie-parser');
+import bodyParser = require('body-parser');
+import logger = require('morgan');
+import { OpenApiValidator } from 'express-openapi-validator';
+const app: express.Application = express();
 
-exports = module.exports = function (definitionPath) {
+export default function(definitionPath) {
 
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.text());
@@ -31,4 +31,4 @@ exports = module.exports = function (definitionPath) {
     });
 
     return app;
-};
+}

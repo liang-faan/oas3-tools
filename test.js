@@ -5,7 +5,7 @@ var fs = require('fs'),
     http = require('http');
 
 var app = require('connect')();
-var swaggerTools = require('../oas3-tools');
+var swaggerTools = require('./src');
 var jsyaml = require('js-yaml');
 var serverPort = 8080;
 

@@ -24,31 +24,7 @@
 
 'use strict';
 
-import _ = require('lodash');
-var debug = require('debug');
-
-var initializeMiddleware = function initializeMiddleware (definition, callback) {
-  debug('Initializing middleware');
-
-  if (_.isUndefined(definition)) {
-    throw new Error('OpenAPI 3 document is required');
-  } else if (!_.isPlainObject(definition)) {
-    throw new TypeError('OpenAPI 3 document must be an object');
-  }
-  callback({
-    swaggerRouter: require('./middleware/swagger-router'),
-    swaggerSecurity: require('./middleware/swagger-security'),
-    swaggerUi: function (options) {
-      const swaggerUi = require('./middleware/swagger-ui');
-      const suArgs = [definition];
-      suArgs.push(options || {});
-
-      return swaggerUi.apply(undefined, suArgs);
-    },
-  });
-};
-
 module.exports = {
-  initializeMiddleware: initializeMiddleware,
+  swaggerRouter: require('./middleware/swagger-router'),
   expressApp: require('./middleware/express-app'),
 };

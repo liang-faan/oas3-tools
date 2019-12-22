@@ -19,9 +19,6 @@ module.exports.findPetsByStatus = function findPetsByStatus (req, res, next) {
     var status = req.query.status[0];
     var sessionid = req.cookies.sessionId;
 
-    console.log("status:", status)
-    console.log("sessionId:", sessionid)
-
     Pet.findPetsByStatus(status,sessionid)
         .then(function (response) {
             utils.writeJson(res, response);

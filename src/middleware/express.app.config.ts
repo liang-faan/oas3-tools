@@ -6,6 +6,7 @@ import cookieParser = require('cookie-parser');
 import bodyParser = require('body-parser');
 import  { SwaggerUI } from './swagger.ui';
 import  { SwaggerRouter } from './swagger.router';
+import  { SwaggerParameters } from './swagger.parameters';
 import * as logger from 'morgan';
 import * as fs from 'fs';
 import * as jsyaml from 'js-yaml';
@@ -43,6 +44,7 @@ export class ExpressAppConfig {
         })
             .install(this.app)
             .then(() => {
+                this.app.use(new SwaggerParameters().checkParameters());
                 this.app.use(new SwaggerRouter().initialize(this.routingOptions));
 
                 this.app.use((err, req, res, next) => {

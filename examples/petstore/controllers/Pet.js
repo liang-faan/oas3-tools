@@ -3,8 +3,7 @@
 var utils = require('../utils/writer.js');
 var Pet = require('../services/PetService');
 
-module.exports.addPet = function addPet (req, res, next) {
-    var body = req.body;
+module.exports.addPet = function addPet (req, res, next, body) {
     Pet.addPet(body)
         .then(function (response) {
             utils.writeJson(res, response);
@@ -14,10 +13,7 @@ module.exports.addPet = function addPet (req, res, next) {
         });
 };
 
-
-module.exports.findPetsByStatus = function findPetsByStatus (req, res, next) {
-    var status = req.query.status[0];
-    var sessionid = req.cookies.sessionId;
+module.exports.findPetsByStatus = function findPetsByStatus (req, res, next, status, sessionid) {
 
     Pet.findPetsByStatus(status,sessionid)
         .then(function (response) {
@@ -28,9 +24,7 @@ module.exports.findPetsByStatus = function findPetsByStatus (req, res, next) {
         });
 };
 
-module.exports.getPetById = function getPetById (req, res, next) {
-
-    var petId = req.openapi.pathParams['petId'];
+module.exports.getPetById = function getPetById (req, res, next, petId) {
     Pet.getPetById(petId)
         .then(function (response) {
             utils.writeJson(res, response);

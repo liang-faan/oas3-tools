@@ -9,14 +9,6 @@ const debug = Debug("oas3-tools:routing");
 
 export class SwaggerRouter {
 
-  getHandlerName (req) {
-    if (req.openapi.schema['x-swagger-router-controller']) {
-      return req.openapi.schema['x-swagger-router-controller'] + '_' + (req.openapi.schema.operationId ? req.openapi.schema.operationId : req.method.toLowerCase());
-    } else {
-     return req.openapi.schema.operationId;
-    }
-  }
-
   handlerCacheFromDir(dirOrDirs: any) {
     const  handlerCache: object = {};
     const  jsFileRegex = /\.(coffee|js|ts)$/;
@@ -33,7 +25,7 @@ export class SwaggerRouter {
     each(dirs, function (dir) {
       each(fs.readdirSync(dir), function (file: string) {
         const controllerName: string = file.replace(jsFileRegex, '');
-        var controller: string;
+        let controller: string;
 
         if (file.match(jsFileRegex) && file.indexOf(".test.js") === -1) {
           controller = require(path.resolve(path.join(dir, controllerName)));
@@ -44,7 +36,7 @@ export class SwaggerRouter {
 
           if (isPlainObject(controller)) {
             each(controller, function (value, name) {
-              var handlerId = controllerName + '_' + name;
+              let handlerId = controllerName + '_' + name;
 
               debug('      %s%s',
                   handlerId,
@@ -60,12 +52,6 @@ export class SwaggerRouter {
     });
 
     return handlerCache;
-  }
-
-  send405(req, res, next) {
-    var err = new Error('Route defined in OpenAPI specification (' + req.openapi.openApiRoute + ') but there is no defined on' + req.method.toUpperCase() + ' operation.');
-    res.statusCode = 405;
-    return next(err);
   }
 
   initialize(options) {
@@ -97,14 +83,25 @@ export class SwaggerRouter {
       handlerCache = this.handlerCacheFromDir(options.controllers);
     }
 
-    const getHandlerName = this.getHandlerName;
-    const send405 = this.send405;
+    const getHandlerName = (req) => {
+      if (req.openapi.schema['x-swagger-router-controller']) {
+        return req.openapi.schema['x-swagger-router-controller'] + '_' + (req.openapi.schema.operationId ? req.openapi.schema.operationId : req.method.toLowerCase());
+      } else {
+        return req.openapi.schema.operationId;
+      }
+    };
 
-    return function swaggerRouter (req, res, next) {
-      var operation = req.openapi ? req.openapi.schema.operationId : undefined;
-      var handler;
-      var handlerName;
-      var rErr;
+    const send405 = (req, res, next) => {
+      let err = new Error('Route defined in OpenAPI specification (' + req.openapi.openApiRoute + ') but there is no defined on' + req.method.toUpperCase() + ' operation.');
+      res.statusCode = 405;
+      return next(err);
+    };
+
+    return (req, res, next) => {
+      let operation = req.openapi ? req.openapi.schema.operationId : undefined;
+      let handler;
+      let handlerName;
+      let rErr;
 
       debug('%s %s', req.method, req.url);
       debug('  Will process: %s', isUndefined(operation) ? 'no' : 'yes');
@@ -123,27 +120,22 @@ export class SwaggerRouter {
 
         if (!isUndefined(handler)) {
           try {
-            return handler(req, res, next);
+            return handler.apply(this, req.openapi.swaggerParameters);
           } catch (err) {
             rErr = err;
-
             debug('Handler threw an unexpected error: %s\n%s', err.message, err.stack);
           }
         } else if (options.ignoreMissingHandlers !== true) {
           rErr = new Error('Cannot resolve the configured swagger-router handler: ' + handlerName);
-
           res.statusCode = 500;
         }
       } else {
         debug('  No handler for method: %s', req.method);
-
         return send405(req, res, next);
       }
-
       if (rErr) {
         debugError(rErr, debug);
       }
-
       return next(rErr);
     };
   };

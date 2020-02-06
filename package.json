@@ -1,6 +1,6 @@
 {
   "name": "oas3-tools",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Swagger-UI and API Rest Routing for Open API v3.",
   "main": "dist/index.js",
   "scripts": {

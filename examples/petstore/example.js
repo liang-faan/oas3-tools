@@ -8,7 +8,13 @@ var serverPort = 8080;
 
 // swaggerRouter configuration
 var options = {
-    controllers: path.join(__dirname, './controllers')
+    routing: {
+        controllers: path.join(__dirname, './controllers')
+    },
+    logging: {
+        format: 'combined',
+        errorLimit: 400
+    }
 };
 
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/petstore.yaml'), options);

@@ -17,9 +17,9 @@ export class ExpressAppConfig {
     private definitionPath: string;
     private routingOptions;
 
-    constructor(definitionPath: string, routingOptions) {
+    constructor(definitionPath: string, appOptions) {
         this.definitionPath = definitionPath;
-        this.routingOptions = routingOptions;
+        this.routingOptions = appOptions.routing;
         this.app = express();
 
         const spec = fs.readFileSync(definitionPath, 'utf8');
@@ -29,7 +29,7 @@ export class ExpressAppConfig {
         this.app.use(bodyParser.text());
         this.app.use(bodyParser.json());
 
-        this.app.use(logger('dev'));
+        this.app.use(this.configureLogger(appOptions.logging));
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(cookieParser());
@@ -55,6 +55,22 @@ export class ExpressAppConfig {
                     });
                 });
             });
+    }
+
+    public configureLogger(loggerOptions){
+        let format = 'dev';
+        if(loggerOptions.format != undefined
+            && typeof loggerOptions.format === 'string'){
+                format = loggerOptions.format;
+        }
+
+        let options:{} = {};
+        if(loggerOptions.errorLimit != undefined
+            && (typeof loggerOptions.errorLimit === 'string' || typeof loggerOptions.errorLimit === 'number')){
+            options['skip'] = function (req, res) { return res.statusCode < parseInt(loggerOptions.errorLimit); };
+        }
+
+        return logger(format, options);
     }
 
     public getApp(): express.Application {

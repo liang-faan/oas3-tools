@@ -59,15 +59,18 @@ export class ExpressAppConfig {
 
     public configureLogger(loggerOptions){
         let format = 'dev';
-        if(loggerOptions.format != undefined
-            && typeof loggerOptions.format === 'string'){
-                format = loggerOptions.format;
-        }
-
         let options:{} = {};
-        if(loggerOptions.errorLimit != undefined
-            && (typeof loggerOptions.errorLimit === 'string' || typeof loggerOptions.errorLimit === 'number')){
-            options['skip'] = function (req, res) { return res.statusCode < parseInt(loggerOptions.errorLimit); };
+
+        if (loggerOptions != undefined) {
+            if(loggerOptions.format != undefined
+                && typeof loggerOptions.format === 'string'){
+                    format = loggerOptions.format;
+            }
+    
+            if(loggerOptions.errorLimit != undefined
+                && (typeof loggerOptions.errorLimit === 'string' || typeof loggerOptions.errorLimit === 'number')){
+                options['skip'] = function (req, res) { return res.statusCode < parseInt(loggerOptions.errorLimit); };
+            }
         }
 
         return logger(format, options);

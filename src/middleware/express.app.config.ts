@@ -34,7 +34,7 @@ export class ExpressAppConfig {
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(cookieParser());
 
-        const swaggerUi = new SwaggerUI(swaggerDoc, undefined);
+        const swaggerUi = new SwaggerUI(swaggerDoc, appOptions);
         this.app.use(swaggerUi.serveStaticContent());
     }
 

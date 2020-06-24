@@ -4,22 +4,25 @@ import * as express from 'express';
 import * as path from 'path';
 import cookieParser = require('cookie-parser');
 import bodyParser = require('body-parser');
-import  { SwaggerUI } from './swagger.ui';
-import  { SwaggerRouter } from './swagger.router';
-import  { SwaggerParameters } from './swagger.parameters';
+import { SwaggerUI } from './swagger.ui';
+import { SwaggerRouter } from './swagger.router';
+import { SwaggerParameters } from './swagger.parameters';
 import * as logger from 'morgan';
 import * as fs from 'fs';
 import * as jsyaml from 'js-yaml';
 import { OpenApiValidator } from 'express-openapi-validator';
+import { Oas3AppOptions } from './oas3.options';
 
 export class ExpressAppConfig {
     private app: express.Application;
     private definitionPath: string;
     private routingOptions;
+    private openApiValidatorOptions;
 
-    constructor(definitionPath: string, appOptions) {
+    constructor(definitionPath: string, appOptions: Oas3AppOptions) {
         this.definitionPath = definitionPath;
         this.routingOptions = appOptions.routing;
+        this.setOpenApiValidatorOptions(definitionPath, appOptions);
         this.app = express();
 
         const spec = fs.readFileSync(definitionPath, 'utf8');
@@ -38,10 +41,22 @@ export class ExpressAppConfig {
         this.app.use(swaggerUi.serveStaticContent());
     }
 
+    private setOpenApiValidatorOptions(definitionPath: string, appOptions: Oas3AppOptions) {
+        //If no options or no openApiValidator Options given, create empty options with api definition path
+        if (!appOptions || !appOptions.openApiValidator) {
+            this.openApiValidatorOptions = { apiSpec: definitionPath };
+            return;
+        }
+
+        // use the given options
+        this.openApiValidatorOptions = appOptions.openApiValidator;
+
+        // Override apiSpec with definition Path to keep the prior behavior
+        this.openApiValidatorOptions.apiSpec = definitionPath;
+    }
+
     public addValidator() {
-        new OpenApiValidator({
-            apiSpec: this.definitionPath,
-        })
+        new OpenApiValidator(this.openApiValidatorOptions)
             .install(this.app)
             .then(() => {
                 this.app.use(new SwaggerParameters().checkParameters());
@@ -57,16 +72,16 @@ export class ExpressAppConfig {
             });
     }
 
-    public configureLogger(loggerOptions){
+    public configureLogger(loggerOptions) {
         let format = 'dev';
-        if(loggerOptions.format != undefined
-            && typeof loggerOptions.format === 'string'){
-                format = loggerOptions.format;
+        if (loggerOptions.format != undefined
+            && typeof loggerOptions.format === 'string') {
+            format = loggerOptions.format;
         }
 
-        let options:{} = {};
-        if(loggerOptions.errorLimit != undefined
-            && (typeof loggerOptions.errorLimit === 'string' || typeof loggerOptions.errorLimit === 'number')){
+        let options: {} = {};
+        if (loggerOptions.errorLimit != undefined
+            && (typeof loggerOptions.errorLimit === 'string' || typeof loggerOptions.errorLimit === 'number')) {
             options['skip'] = function (req, res) { return res.statusCode < parseInt(loggerOptions.errorLimit); };
         }
 

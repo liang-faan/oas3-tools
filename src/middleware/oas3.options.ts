@@ -6,8 +6,11 @@ export class Oas3AppOptions {
     public openApiValidator: OpenApiValidatorOpts;
     public logging: LoggingOptions;
 
-    constructor(routingOpts: any, openApiValidatorOpts: OpenApiValidatorOpts) {
+    constructor(routingOpts: any, openApiValidatorOpts: OpenApiValidatorOpts, logging: LoggingOptions) {
         this.routing = routingOpts;
         this.openApiValidator = openApiValidatorOpts;
+        if (!logging )
+        logging = new LoggingOptions(null,null);
+        this.logging = logging;
     }
 }

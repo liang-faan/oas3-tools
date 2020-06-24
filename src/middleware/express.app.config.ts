@@ -15,7 +15,6 @@ import { Oas3AppOptions } from './oas3.options';
 
 export class ExpressAppConfig {
     private app: express.Application;
-    private definitionPath: string;
     private routingOptions;
     private openApiValidatorOptions;
 

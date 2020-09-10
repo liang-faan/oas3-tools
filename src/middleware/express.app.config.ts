@@ -16,6 +16,7 @@ import { Oas3AppOptions } from './oas3.options';
 export class ExpressAppConfig {
     private app: express.Application;
     private routingOptions;
+    private definitionPath;
     private openApiValidatorOptions;
 
     constructor(definitionPath: string, appOptions: Oas3AppOptions) {
@@ -36,7 +37,7 @@ export class ExpressAppConfig {
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(cookieParser());
 
-        const swaggerUi = new SwaggerUI(swaggerDoc, appOptions);
+        const swaggerUi = new SwaggerUI(swaggerDoc, appOptions.swaggerUI);
         this.app.use(swaggerUi.serveStaticContent());
     }
 

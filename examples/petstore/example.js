@@ -6,6 +6,12 @@ var http = require('http');
 var oas3Tools = require('oas3-tools');
 var serverPort = 8080;
 
+function validate(req, secDef, token, next) {
+    console.log(token);
+    console.log(req);
+    console.log(secDef);
+}
+
 // swaggerRouter configuration
 var options = {
     routing: {
@@ -14,8 +20,16 @@ var options = {
     logging: {
         format: 'combined',
         errorLimit: 400
+    },
+    openApiValidator: {
+
+        securityHandlers: {
+            // your security settings
+            ApiKeyAuth: validate
+        }
     }
-};
+}; 
+
 
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/petstore.yaml'), options);
 expressAppConfig.addValidator();
